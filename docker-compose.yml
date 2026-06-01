@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: chatapp-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - chatapp-net
+
+  server:
+    build: ./server
+    container_name: chatapp-server
+    restart: unless-stopped
+    environment:
+      PORT: 5000
+      MONGO_URI: mongodb://mongo:27017/chatapp
+      JWT_SECRET: ${JWT_SECRET:-changeme_in_production}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:5173}
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server/uploads:/app/uploads
+    depends_on:
+      - mongo
+    networks:
+      - chatapp-net
+
+  client:
+    build:
+      context: ./client
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:5000/api}
+        VITE_SOCKET_URL: ${VITE_SOCKET_URL:-http://localhost:5000}
+    container_name: chatapp-client
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - server
+    networks:
+      - chatapp-net
+
+volumes:
+  mongo_data:
+
+networks:
+  chatapp-net:
+    driver: bridge
