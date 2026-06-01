@@ -75,6 +75,32 @@ export default function MessageBubble({ message, showAvatar, onReply }) {
     }
   };
 
+  // Tick status
+  const renderTicks = () => {
+    if (!isMine) return null;
+    const isRead = message.readBy?.length > 1;
+    return (
+      <span className="flex items-center ml-0.5">
+        {isRead ? (
+          // Double blue tick — Read
+          <span className="flex items-center -space-x-1.5">
+            <svg className="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+            </svg>
+            <svg className="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+        ) : (
+          // Single grey tick — Sent
+          <svg className="w-3.5 h-3.5 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+          </svg>
+        )}
+      </span>
+    );
+  };
+
   return (
     <div className={`flex items-end gap-2 mb-1 group ${isMine ? 'flex-row-reverse' : 'flex-row'} msg-enter`}>
       {/* Avatar */}
@@ -108,16 +134,12 @@ export default function MessageBubble({ message, showAvatar, onReply }) {
         >
           {renderContent()}
 
-          {/* Time */}
+          {/* Time + Ticks */}
           <div className={`flex items-center gap-1 mt-1 ${isMine ? 'justify-end' : 'justify-start'}`}>
             <span className={`text-[10px] ${isMine ? 'text-white/60' : 'text-gray-500'}`}>
               {format(new Date(message.createdAt), 'HH:mm')}
             </span>
-            {isMine && (
-              <svg className={`w-3 h-3 ${message.readBy?.length > 1 ? 'text-blue-300' : 'text-white/50'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-              </svg>
-            )}
+            {renderTicks()}
           </div>
 
           {/* Context menu */}
